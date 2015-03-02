@@ -1,6 +1,15 @@
 <?php
 
 /*
+ * Change these to match your DB preferences
+ */
+
+define('HOSTNAME', 'CHANGE');
+define('USERNAME', 'CHANGE');
+define('PASSWORD', 'CHANGE');
+define('DATABASE_NAME', 'CHANGE');
+
+/*
  * Connection Class
  *   Handles the DB accessing for the site, all connection and querying goes through here
  */
@@ -12,7 +21,7 @@ class Connection {
     /*
      * PUBLIC CONNECT
      *
-     * handles the connecting to the MySQL server, must be done before any querying can happen
+     * handles the connecting to the MySQL server, must be done before any querying can happen. 
      *
      * @return void
      */
@@ -96,6 +105,23 @@ class Connection {
         /* close statement and connection */
         $stmt->close();
     }
+
+    /*
+     * PUBLIC UPDATESALT
+     *
+     * Handles the case where updating a column that uses an md5 and salt.
+     *
+     * @requires Connection::connect called prior to this
+     *
+     * @param String   table           the table containing the record(s) to update
+     * @param String   types           the string representation of the types to be parameterized ('iissii')
+     * @param String[] columns         an array of columns to update in the table
+     * @param String[] params          an array of parameters used in the statement (includes where variables)
+	 * @param String   salt            the salt to concat to the value to update to
+     * @param String   whereStatement  the where statement of the update (everything after the sets)
+     *
+     * @return void
+     */
 
     public function updateSalt($table, $types, $columns, $params,$salt, $whereStatement) {
         //print_r($params);
@@ -299,6 +325,12 @@ class Connection {
     public function close() {
         mysqli_close($this->mysqli);
     }
+	
+	/**
+	 **
+	 ** Useful functions that do not relate to the DB at all
+	 **
+	 **/
 
     /*
      * PUBLIC TIMEDIFFERENCE
@@ -430,89 +462,6 @@ class Connection {
 
         // Print the response data
         return $res;
-    }
-
-    public static function hex2RGB($hexStr, $returnAsString = false, $seperator = ',') {
-        $hexStr = preg_replace("/[^0-9A-Fa-f]/", '', $hexStr); // Gets a proper hex string
-        $rgbArray = array();
-        if (strlen($hexStr) == 6) { //If a proper hex code, convert using bitwise operation. No overhead... faster
-            $colorVal = hexdec($hexStr);
-            $rgbArray['red'] = 0xFF & ($colorVal >> 0x10);
-            $rgbArray['green'] = 0xFF & ($colorVal >> 0x8);
-            $rgbArray['blue'] = 0xFF & $colorVal;
-        } elseif (strlen($hexStr) == 3) { //if shorthand notation, need some string manipulations
-            $rgbArray['red'] = hexdec(str_repeat(substr($hexStr, 0, 1), 2));
-            $rgbArray['green'] = hexdec(str_repeat(substr($hexStr, 1, 1), 2));
-            $rgbArray['blue'] = hexdec(str_repeat(substr($hexStr, 2, 1), 2));
-        } else {
-            return false; //Invalid hex color code
-        }
-        return $returnAsString ? implode($seperator, $rgbArray) : $rgbArray; // returns the rgb string or the associative array
-    }
-
-    /*
-     * PUBLIC CREATEBREADCRUMBS
-     *
-     * A function to create a breadcrumbs component in HTML dynamically.
-     *
-     * @param String   title    the title used on the left of the Breadcrumbs component
-     * @param String[] options  an array of the text breadcrumbs
-     * @param String[] urls     an array of urls to use with the text
-     * @param String   active   the current page in the breadcrumbs that has no link
-     *
-     * @return String  html     the HTML for the breadcrumbs component
-     */
-
-    public static function createBreadCrumbs($title,$options,$urls,$active) {
-        $html = '<div class="breadcrumbs-v3">
-                    <div class="container">
-                        <h1 class="pull-left">'.$title.'</h1>
-                        <ul class="pull-right breadcrumb">';
-        if(count($options)>0){
-            foreach($options as $i=>$opt){
-                $html .= '<li><a href="'.$urls[$i].'">'.$opt.'</a></li>';
-            }
-        }
-        $html .= '<li class="active">'.$active.'</li>
-                        </ul>
-                    </div>
-                </div>';
-        return $html;
-    }
-
-    /*
-     * PUBLIC CREATEPROFILETABS
-     *
-     * Function to create the tabs used in on profile pages in Communities or SciCrunch pages
-     *
-     * @param int    active  the current active tab, 0-3 acceptable
-     * @param String url     the base url that the tab should link to
-     * @param String goto    A url only filled out if there should be a button to link to the community
-     *
-     * @return String html  the HTML to create the tabs
-     */
-
-    public static function createProfileTabs($active,$url,$goto,$vars){
-        $titles = array('Information','Content','Appearance','Resources');
-        $tabs = array('information','content','appearance','resources');
-        $html = '<div class="tab-v1">
-                    <ul class="nav nav-tabs margin-bottom-20">';
-        for($i=0;$i<4;$i++){
-            if($active==$i){
-                $html .= '<li class="active"><a style="cursor: pointer" href="'.$url.'?tab='.$tabs[$i].'">'.$titles[$i].'</a></li>';
-            } else {
-                $html .= '<li><a href="'.$url.'?tab='.$tabs[$i].'">'.$titles[$i].'</a></li>';
-            }
-        }
-        if($goto)
-            $html .= '<li class="pull-right"><a href="'.$goto.'"><i class="fa fa-share"></i> Goto Community</a></li>';
-        if(count($vars)>0){
-            foreach($vars as $array){
-                $html .= '<li class="pull-right"><a href="'.$array['url'].'"><i class="fa fa-share"></i> '.$array['name'].'</a></li>';
-            }
-        }
-        $html .= '</ul></div>';
-        return $html;
     }
 
 }
