@@ -27,18 +27,26 @@ once you are done with the db to keep the number of connections lower.
 
 ### The Database for these examples
 
-Table: my_table
+** Table: my_table **
 
 auto_incremented | some_int | text1 | text2 | time 
 ---------------- | -------- | ----- | ----- | ----
 Empty |  |  |  | 
 
+** Table: joining_table **
+
+myid | firstname | lastname 
+---- | --------- | -------- 
+Empty | |   
+
 ### 1. Insert Statements
+
+INSERT INTO table VALUES (?,?,?);
 
 ```php
 $db = new Connection();
 $db->connect();
-$insert_id = $db->insert('my_table','iissi',array(null,1,'Some Text','bye',time());
+$insert_id = $db->insert('my_table','iissi',array(null,1,'Some Text','key,other',time()));
 $db->close();
 ```
 
@@ -48,4 +56,99 @@ The table following the insert would look like:
 
 auto_incremented | some_int | text1 | text2 | time 
 ---------------- | -------- | ----- | ----- | ----
-1 | 1 | Some Text | bye | 1425338259
+1 | 1 | Some Text | key,other | 1425338259
+
+Let's fill the tables now:
+
+
+```php
+$db = new Connection();
+$db->connect();
+$db->insert('my_table','iissi',array(null,2,'A longer description for me to search through','work,help',time()));
+$db->insert('my_table','iissi',array(null,1,'I need some key words and common things for searching','tags,help,more',time()));
+$db->insert('my_table','iissi',array(null,3,'Simulating a general key based tagging','key,work,more',time()));
+$db->insert('joining_table','iss',array(1,'John','Stamos'));
+$db->insert('joining_table','iss',array(2,'Steve','Banks'));
+$db->insert('joining_table','iss',array(3,'Ella','Brooks'));
+$db->insert('joining_table','iss',array(4,'Michael','Jones'));
+$db->close();
+```
+
+and the resulting tables:
+
+** Table: my_table **
+
+auto_incremented | some_int | text1 | text2 | time 
+---------------- | -------- | ----- | ----- | ----
+1 | 1 | Some Text | key,other |  1425338259
+2 | 2 | A longer description for me to search through | work,help |  1425338279
+3 | 1 | I need some key words and common things for searching | tags,help,more |  1425338280
+4 | 3 | Simulating a general key based tagging | key,work,more |  1425338281
+
+** Table: joining_table **
+
+myid | firstname | lastname 
+---- | --------- | -------- 
+1 | John | Stamos  
+2 | Steve | Banks  
+3 | Ella | Brooks 
+4 | Michael | Jones
+
+### Update Statements
+
+UPDATE table SET columns WHERE wherestatement
+
+```php
+$db = new Connection();
+$db->connect();
+$db->update('joining_table', 'si', array('firstname'), array('Sarah',1), 'where myid=?');
+$db->close();
+``` 
+
+Update statements probably make the least sense right away because of how they are structured. I say i am submitting
+two variables, and yet only have one column: firstname. This is because the other variable is within the where statement.
+Update statements have parameterized values in the SET part of the statement, and in the WHERE section. The columns then
+specify which columns you are updating, and the prepared statements will handle placing things in the right place as
+long as they are in the right order.
+
+** Table: joining_table **
+
+myid | firstname | lastname 
+---- | --------- | -------- 
+1 | Sarah | Stamos  
+2 | Steve | Banks  
+3 | Ella | Brooks 
+4 | Michael | Jones
+
+### Select Statements
+
+SELECT columns FROM table WHERE wherestatement
+
+```php
+$db = new Connection();
+$db->connect();
+$return = $db->select('my_table', array('*'),'s',array('search'),'where text1 like ? order by auto_incremented desc');
+$db->close();
+print_r($return);
+``` 
+
+**Output**
+```
+Array(
+  [0] => array( 
+    'auto_incremented' => 2, 
+	'some_int' => 2,
+	'text1' => 'A longer description for me to search through',
+	'text2' => 'work,help',
+	'time' => 1425338279
+	),
+  [1] => array( 
+    'auto_incremented' => 3, 
+	'some_int' => 1,
+	'text1' => 'I need some key words and common things for searching',
+	'text2' => 'tags,help,more',
+	'time' => 1425338280
+	)	
+);
+```
+
