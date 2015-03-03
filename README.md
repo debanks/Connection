@@ -34,13 +34,13 @@ once you are done with the db to keep the number of connections lower.
 
 ### The Database for these examples
 
-** Table: my_table **
+**Table: my_table**
 
 auto_incremented | some_int | text1 | text2 | time 
 ---------------- | -------- | ----- | ----- | ----
 Empty |  |  |  | 
 
-** Table: joining_table **
+**Table: joining_table**
 
 myid | firstname | lastname 
 ---- | --------- | -------- 
@@ -55,6 +55,12 @@ $db = new Connection();
 $db->connect();
 $insert_id = $db->insert('my_table','iissi',array(null,1,'Some Text','key,other',time()));
 $db->close();
+```
+
+**MySQL Statement**
+
+```sql
+INSERT INTO my_table VALUES(null, 1, 'Some Text', 'key,other', 1425338259);
 ```
 
 This example opens the connection and performs a single insert and closes the connection. The insert is
@@ -111,6 +117,12 @@ $db->connect();
 $db->update('joining_table', 'si', array('firstname'), array('Sarah',1), 'where myid=?');
 $db->close();
 ``` 
+
+**MySQL Statement**
+
+```sql
+UPDATE joining_table SET firstname=? where myid=?;
+```
 
 Update statements probably make the least sense right away because of how they are structured. I say i am submitting
 two variables, and yet only have one column: firstname. This is because the other variable is within the where statement.
