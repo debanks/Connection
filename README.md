@@ -242,6 +242,7 @@ DELETE FROM joining_table;
 ```
 
 **Output**
+
 myid | firstname | lastname 
 ---- | --------- | -------- 
 Empty | | 
