@@ -9,6 +9,7 @@ your own code.
 1. [Insert Statements] (https://github.com/debanks/Connection#1-insert-statements)
 2. [Update Statements] (https://github.com/debanks/Connection#2-update-statements)
 3. [Select Statements] (https://github.com/debanks/Connection#3-select-statements)
+4. [Delete Statements] (https://github.com/debanks/Connection#4-delete-statements)
 
 ## What this Class Does
 
