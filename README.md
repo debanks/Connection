@@ -76,7 +76,7 @@ $db->close();
 
 and the resulting tables:
 
-** Table: my_table **
+**Table: my_table**
 
 auto_incremented | some_int | text1 | text2 | time 
 ---------------- | -------- | ----- | ----- | ----
@@ -85,7 +85,7 @@ auto_incremented | some_int | text1 | text2 | time
 3 | 1 | I need some key words and common things for searching | tags,help,more |  1425338280
 4 | 3 | Simulating a general key based tagging | key,work,more |  1425338281
 
-** Table: joining_table **
+**Table: joining_table**
 
 myid | firstname | lastname 
 ---- | --------- | -------- 
@@ -111,7 +111,7 @@ Update statements have parameterized values in the SET part of the statement, an
 specify which columns you are updating, and the prepared statements will handle placing things in the right place as
 long as they are in the right order.
 
-** Table: joining_table **
+**Table: joining_table**
 
 myid | firstname | lastname 
 ---- | --------- | -------- 
@@ -123,6 +123,8 @@ myid | firstname | lastname
 ### Select Statements
 
 SELECT columns FROM table WHERE wherestatement
+
+#### Example 1
 
 ```php
 $db = new Connection();
@@ -136,19 +138,45 @@ print_r($return);
 ```
 Array(
   [0] => array( 
-    'auto_incremented' => 2, 
-	'some_int' => 2,
-	'text1' => 'A longer description for me to search through',
-	'text2' => 'work,help',
-	'time' => 1425338279
-	),
-  [1] => array( 
     'auto_incremented' => 3, 
 	'some_int' => 1,
 	'text1' => 'I need some key words and common things for searching',
 	'text2' => 'tags,help,more',
 	'time' => 1425338280
+	),
+  [1] => array( 
+    'auto_incremented' => 2, 
+	'some_int' => 2,
+	'text1' => 'A longer description for me to search through',
+	'text2' => 'work,help',
+	'time' => 1425338279
 	)	
 );
 ```
 
+I showed the actual output above, it's array of db rows in key => value format. From now on i'll just be
+showing the nice markdown table of the output for my own sanity. As you can see there is very little required
+in the wherestatement and it should reflect exactly what you would want normally in the where statement. This
+can be cases for trimming down the return to the order, grouping, and limit. 
+
+#### Example 2
+
+```php
+$db = new Connection();
+$db->connect();
+$return = $db->select(
+    'my_table as a join joining_table as b on b.myid = a.auto_incremented', 
+     array('a.auto_incremented','a.text2','b.firstname'),
+	 's',
+	 array('work'),
+	 'where find_in_set(?,a.text2)>0'
+	 );
+$db->close();
+``` 
+
+**The Return**
+
+auto_incremented | text2 | firstname
+---------------- | ----- | ---------
+2 | work,help | Steve
+4 | key,work,more | Michael
